@@ -481,9 +481,9 @@ class GDAL2Tiles(object):
         # -------------------------------------------------------------------------
             
             
-        def indexFile(self, comb):
+        def indexFile(self, combs):
                 # Generation of main metadata files and HTML viewers (this was the second process but the order was chenge assuming there are no dependencies) 
-                    self.generate_metadata(comb)
+                    self.generate_metadata(combs)
                     
         # -------------------------------------------------------------------------
         def error(self, msg, details = "" ):
@@ -979,7 +979,7 @@ class GDAL2Tiles(object):
                         self.tileswne = lambda x, y, z: (0,0,0,0)
                                 
             # -------------------------------------------------------------------------
-        def generate_metadata(self):
+        def generate_metadata(self, combs):
                 """Generation of main metadata files and HTML viewers (metadata related to particular tiles are generated during the tile processing)."""
                 
                 if not os.path.exists(self.output):
@@ -1004,7 +1004,7 @@ class GDAL2Tiles(object):
                     if self.options.webviewer in ('all','openlayers'):
                         if not self.options.resume or not os.path.exists(os.path.join(self.output, 'openlayers.html')):
                             f = open(os.path.join(self.output, 'openlayers.html'), 'w')
-                            f.write( self.generate_openlayers() )
+                            f.write( self.generate_openlayers(combs) )
                             f.close()
                 
                 elif self.options.profile == 'geodetic':
@@ -1019,7 +1019,7 @@ class GDAL2Tiles(object):
                     if self.options.webviewer in ('all','openlayers'):
                         if not self.options.resume or not os.path.exists(os.path.join(self.output, 'openlayers.html')):
                             f = open(os.path.join(self.output, 'openlayers.html'), 'w')
-                            f.write( self.generate_openlayers() )
+                            f.write( self.generate_openlayers(combs) )
                             f.close()			
                 
                 elif self.options.profile == 'raster':
@@ -1033,7 +1033,7 @@ class GDAL2Tiles(object):
                     if self.options.webviewer in ('all','openlayers'):
                         if not self.options.resume or not os.path.exists(os.path.join(self.output, 'openlayers.html')):
                             f = open(os.path.join(self.output, 'openlayers.html'), 'w')
-                            f.write( self.generate_openlayers() )
+                            f.write( self.generate_openlayers(combs) )
                             f.close()			
                 
                 
@@ -1836,7 +1836,7 @@ class GDAL2Tiles(object):
                             
                             
                             # -------------------------------------------------------------------------
-        def generate_openlayers( self, comb ):
+        def generate_openlayers( self, combs ):
                                 """
                                     Template for openlayers.html implementing overlay of available Spherical Mercator layers.
                                     
@@ -1861,7 +1861,7 @@ class GDAL2Tiles(object):
                             
                             
                             
-                                def coms2html(comb):
+                                def combs2html(combs):
                                     
                                     #Takes in an array of the combination ex. combs2html([754,321,432,543,453])
                                     #outputs the html code that does 3 functions:
@@ -2158,14 +2158,28 @@ class GDAL2Tiles(object):
 # =============================================================================
 # =============================================================================
 if __name__=='__main__':
-	argv = gdal.GeneralCmdLineProcessor( sys.argv ) #file name will be a list of all the file names 
-    
+        argv = gdal.GeneralCmdLineProcessor( sys.argv ) #file name will be a list of all the file names  ex: [file1.geo.tif,file2.geo.tif] NO SPACES INSIDE THE LIST
 
 	if argv:
-            #namesLoop= argv[-1]
-            #for file_name in namesLoop: 
-                #argv[-1]= file_name
-                gdal2tiles = GDAL2Tiles( argv[1:] )
-                gdal2tiles.process()
-                gdal2tiles.indexFile( comb )
+                i=1
+                namesLoop= argv[-1]
+                #read combs from the external file "combs.txt" as a list of combs
+                file= open("combs.txt")
+                combs= file.readline()
+                combs=eval(combs)
+                namesLoop= namesLoop[1:-1].split(',')
+                for file_name in namesLoop:
+                        print '#############'
+                        print 'filename:', file_name
+                        print '#############'
+                        print 'Slicing file (',i,'/',len(namesLoop),')'
+                        argv[-1]= file_name
+                        gdal2tiles = GDAL2Tiles( argv[1:] )
+                        gdal2tiles.process()
+                        i+=1
+                print ""
+                print "Generating index.html"
+                gdal2tiles.indexFile( combs )
+                print "Done..."
+                print "OpenIR 2012" 
 
