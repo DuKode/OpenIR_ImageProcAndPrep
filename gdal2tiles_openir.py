@@ -463,7 +463,7 @@ class Zoomify(object):
 class GDAL2Tiles(object):
     
 	# -------------------------------------------------------------------------
-	def process(self):
+        def process(self):
 		"""The main processing function, runs all the main steps of processing Also takes a list of the band combination we have"""
 		
 		# Opening and preprocessing of the input file
@@ -479,9 +479,9 @@ class GDAL2Tiles(object):
             # -------------------------------------------------------------------------
             
             
-            def indexFile(self, comb):
+        def indexFile(self, comb):
                 # Generation of main metadata files and HTML viewers (this was the second process but the order was chenge assuming there are no dependencies) 
-                self.generate_metadata(comb)
+                    self.generate_metadata(comb)
                     
                     # -------------------------------------------------------------------------
                     def error(self, msg, details = "" ):
@@ -1859,58 +1859,58 @@ class GDAL2Tiles(object):
                     
                     
                     
-                    def coms2html(comb):
-                        
-                        #Takes in an array of the combination ex. combs2html([754,321,432,543,453])
-                        #outputs the html code that does 3 functions:
-                        #1- generates the create Overlay layer code for all the bands
-                        #2- generates the setOpacity code for the corresponding combs
-                        #3- generates the map.addLayers code
-                        #The output is in a python string that contains the html code 
-                        
-                        
-                        #The STND Directory name to save the tile must be names with the number of the comb ex: NewYork>>345,234,643,532
-                        
-                        
-                        labels= {321:"True Color", 432: "Vegetation", 453: "Soil", 543: "Urban", 754: "Water"}
-                        
-                        s="" #initialize the var s
-                        
-                        for i in range(len(combs)):
+                        def coms2html(comb):
                             
-                            s+= """
-                                // create %d Overlay layer
+                            #Takes in an array of the combination ex. combs2html([754,321,432,543,453])
+                            #outputs the html code that does 3 functions:
+                            #1- generates the create Overlay layer code for all the bands
+                            #2- generates the setOpacity code for the corresponding combs
+                            #3- generates the map.addLayers code
+                            #The output is in a python string that contains the html code 
+                            
+                            
+                            #The STND Directory name to save the tile must be names with the number of the comb ex: NewYork>>345,234,643,532
+                            
+                            
+                            labels= {321:"True Color", 432: "Vegetation", 453: "Soil", 543: "Urban", 754: "Water"}
+                            
+                            s="" #initialize the var s
+                            
+                            for i in range(len(combs)):
                                 
-                                var overlay_%d = new OpenLayers.Layer.TMS( "%d: %s", "",
-                                {   // url: '', serviceVersion: '.', layername: '.',
-                                type: 'png', getURL: overlay_getTileURL("%d"), alpha: true, 
-                                isBaseLayer: false
-                                });
-                                
-                                """ %(combs[i],combs[i],combs[i],labels[combs[i]],combs[i])
-                        
-                        s+="""
-                            if (OpenLayers.Util.alphaHack() == false) { 
-                            """
-                        band_list= ""
-                        for i in range(len(combs)):
+                                s+= """
+                                    // create %d Overlay layer
+                                    
+                                    var overlay_%d = new OpenLayers.Layer.TMS( "%d: %s", "",
+                                    {   // url: '', serviceVersion: '.', layername: '.',
+                                    type: 'png', getURL: overlay_getTileURL("%d"), alpha: true, 
+                                    isBaseLayer: false
+                                    });
+                                    
+                                    """ %(combs[i],combs[i],combs[i],labels[combs[i]],combs[i])
                             
                             s+="""
-                                overlay_%d.setOpacity(1);""" %(combs[i])
-                            band_list+=",overlay_%d"%(combs[i])
-                        
-                        s+="""
-                            }
+                                if (OpenLayers.Util.alphaHack() == false) { 
+                                """
+                            band_list= ""
+                            for i in range(len(combs)):
+                                
+                                s+="""
+                                    overlay_%d.setOpacity(1);""" %(combs[i])
+                                band_list+=",overlay_%d"%(combs[i])
                             
-                            map.addLayers([osm"""+band_list+"]);"
-                        
-                        return s
+                            s+="""
+                                }
+                                
+                                map.addLayers([osm"""+band_list+"]);"
+                            
+                            return s
                             
                             
                             
                             #-------------- start the html file ------------------------#
                             
-                            s = """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+                        s = """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
                                 <html xmlns="http://www.w3.org/1999/xhtml"
                                 <head>
                                 <title>%(title)s</title>
@@ -1924,13 +1924,13 @@ class GDAL2Tiles(object):
                                 #map { height: 95%%; border: 1px solid #888; }
                                 </style>""" % args
                             
-                            if self.options.profile == 'mercator':
+                        if self.options.profile == 'mercator':
                                 s += """
                                     <script src='http://dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=6.1'></script>
                                     <script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=%(googlemapskey)s' type='text/javascript'></script>
                                     <script src="http://api.maps.yahoo.com/ajaxymap?v=3.0&amp;appid=%(yahooappid)s"></script>""" % args
                             
-                            s += """
+                        s += """
                                 
                                 
                                 <script src="http://www.openlayers.org/api/2.7/OpenLayers.js" type="text/javascript"></script>
@@ -1946,7 +1946,7 @@ class GDAL2Tiles(object):
                                 
                                 function init(){""" % args
                             
-                            if self.options.profile == 'mercator':
+                        if self.options.profile == 'mercator':
                                 s += """
                                     var options = {
                                     controls: [],
@@ -1966,18 +1966,18 @@ class GDAL2Tiles(object):
                                     "http://tile.openaerialmap.org/tiles/1.0.0/openaerialmap-900913/",
                                     { type: 'png', getURL: osm_getTileURL } );""" %args
                         
-                        #INSERT combs2html function here
+                                #INSERT combs2html function here
                         
-                        s+= combs2html(combs)
+                                s+= combs2html(combs)
                             
-                            s+=  """var switcherControl = new OpenLayers.Control.LayerSwitcher();
-                                map.addControl(switcherControl);
-                                switcherControl.maximizeControl();
+                                s+=  """var switcherControl = new OpenLayers.Control.LayerSwitcher();
+                                    map.addControl(switcherControl);
+                                    switcherControl.maximizeControl();
                                 
-                                map.zoomToExtent( mapBounds.transform(map.displayProjection, map.projection ) );
-                                """ % args
+                                    map.zoomToExtent( mapBounds.transform(map.displayProjection, map.projection ) );
+                                    """ % args
                                     
-                                    elif self.options.profile == 'geodetic':
+                        elif self.options.profile == 'geodetic':
                                         s += """
                                             var options = {
                                             controls: [],
@@ -2010,7 +2010,7 @@ class GDAL2Tiles(object):
                                             map.zoomToExtent( mapBounds );
                                             """
                                     
-                                    elif self.options.profile == 'raster':
+                        elif self.options.profile == 'raster':
                                         s += """
                                             var options = {
                                             controls: [],
@@ -2029,7 +2029,7 @@ class GDAL2Tiles(object):
                                             """ % args
                                     
                                     
-                                    s += """
+                        s += """
                                         map.addControl(new OpenLayers.Control.PanZoomBar());
                                         map.addControl(new OpenLayers.Control.MousePosition());
                                         map.addControl(new OpenLayers.Control.MouseDefaults());
@@ -2037,7 +2037,7 @@ class GDAL2Tiles(object):
                                         }
                                         """ % args
                                     
-                                    if self.options.profile == 'mercator':
+                        if self.options.profile == 'mercator':
                                         s += """
                                             function osm_getTileURL(bounds) {
                                             var res = this.map.getResolution();
@@ -2074,7 +2074,7 @@ class GDAL2Tiles(object):
                                             
                                             """ % args
                                     
-                                    elif self.options.profile == 'geodetic':
+                        elif self.options.profile == 'geodetic':
                                         s += """
                                             function overlay_getTileURL(bounds) {
                                             bounds = this.adjustBounds(bounds);
@@ -2093,7 +2093,7 @@ class GDAL2Tiles(object):
                                             }
                                             """ % args
                                     
-                                    elif self.options.profile == 'raster':
+                        elif self.options.profile == 'raster':
                                         s += """
                                             function overlay_getTileURL(bounds) {
                                             var res = this.map.getResolution();
@@ -2108,7 +2108,7 @@ class GDAL2Tiles(object):
                                             }
                                             """ % args
                                     
-                                    s += """
+                        s += """
                                         function getWindowHeight() {
                                         if (self.innerHeight) return self.innerHeight;
                                         if (document.documentElement && document.documentElement.clientHeight)
@@ -2150,17 +2150,20 @@ class GDAL2Tiles(object):
                                         </body>
                                         </html>""" % args
                                     
-                                    return s
+                        return s
 
 # =============================================================================
 # =============================================================================
 # =============================================================================
 if __name__=='__main__':
 	argv = gdal.GeneralCmdLineProcessor( sys.argv ) #file name will be a list of all the file names 
+    
+
 	if argv:
-    namesLoop= argv[-1]
-    for file_name in namesLoop: 
-        argv[-1]= file_name
-        gdal2tiles = GDAL2Tiles( argv[1:] )
-        gdal2tiles.process()
-    gdal2tiles .indexFile( comb )
+            namesLoop= argv[-1]
+            for file_name in namesLoop: 
+                argv[-1]= file_name
+                gdal2tiles = GDAL2Tiles( argv[1:] )
+                gdal2tiles.process()
+                gdal2tiles.indexFile( comb )
+
