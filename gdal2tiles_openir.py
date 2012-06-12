@@ -1966,13 +1966,16 @@ class GDAL2Tiles(object):
                                             { type: 'png', getURL: osm_getTileURL, displayOutsideMaxExtent: true, attribution: '<a href="http://www.openstreetmap.org/">OpenStreetMap</a>'} );
                                             var oam = new OpenLayers.Layer.TMS( "OpenAerialMap",
                                             "http://tile.openaerialmap.org/tiles/1.0.0/openaerialmap-900913/",
-                                            { type: 'png', getURL: osm_getTileURL } );""" %args
+                                            { type: 'png', getURL: osm_getTileURL } );
+
+                                            """ %args
                                 
                                         #INSERT combs2html function here
                                 
                                         s+= combs2html(combs)
                                     
-                                        s+=  """var switcherControl = new OpenLayers.Control.LayerSwitcher();
+                                        s+=  """
+                                            var switcherControl = new OpenLayers.Control.LayerSwitcher();
                                             map.addControl(switcherControl);
                                             switcherControl.maximizeControl();
                                         
@@ -2036,12 +2039,12 @@ class GDAL2Tiles(object):
                                                 map.addControl(new OpenLayers.Control.MousePosition());
                                                 map.addControl(new OpenLayers.Control.MouseDefaults());
                                                 map.addControl(new OpenLayers.Control.KeyboardDefaults());
-                                                }
+                                        }
                                                 """ % args
                                             
                                 if self.options.profile == 'mercator':
                                                 s += """
-                                                    function osm_getTileURL(bounds) {
+                                                function osm_getTileURL(bounds) {
                                                     var res = this.map.getResolution();
                                                     var x = Math.round((bounds.left - this.maxExtent.left) / (res * this.tileSize.w));
                                                     var y = Math.round((this.maxExtent.top - bounds.top) / (res * this.tileSize.h));
@@ -2049,30 +2052,30 @@ class GDAL2Tiles(object):
                                                     var limit = Math.pow(2, z);
                                                     
                                                     if (y < 0 || y >= limit) {
-                                                    return "http://www.maptiler.org/img/none.png";
+                                                            return "http://www.maptiler.org/img/none.png";
                                                     } else {
-                                                    x = ((x %% limit) + limit) %% limit;
-                                                    return this.url + z + "/" + x + "/" + y + "." + this.type;
+                                                            x = ((x %% limit) + limit) %% limit;
+                                                            return this.url + z + "/" + x + "/" + y + "." + this.type;
                                                     }
-                                                    }
+                                                }
                                                     
                                                     //we rewrote this function to be generic for all the tiles
                                                     
-                                                    function overlay_getTileURL(directory) {
+                                                function overlay_getTileURL(directory) {
                                                     return function(bounds) {
-                                                    var res = this.map.getResolution();
-                                                    var x = Math.round((bounds.left - this.maxExtent.left) / (res * this.tileSize.w));
-                                                    var y = Math.round((bounds.bottom - this.tileOrigin.lat) / (res * this.tileSize.h));
-                                                    var z = this.map.getZoom();
-                                                    if (mapBounds.intersectsBounds( bounds ) && z >= mapMinZoom && z <= mapMaxZoom ) {
-                                                    //console.log( this.url + z + "/" + x + "/" + y + "." + this.type);
-                                                    return this.url + directory + "/" + z + "/" + x + "/" + y + "." + this.type;
-                                                    } else {
-                                                    return "http://www.maptiler.org/img/none.png";
-                                                    }
+                                                            var res = this.map.getResolution();
+                                                            var x = Math.round((bounds.left - this.maxExtent.left) / (res * this.tileSize.w));
+                                                            var y = Math.round((bounds.bottom - this.tileOrigin.lat) / (res * this.tileSize.h));
+                                                            var z = this.map.getZoom();
+                                                            if (mapBounds.intersectsBounds( bounds ) && z >= mapMinZoom && z <= mapMaxZoom ) {
+                                                                    //console.log( this.url + z + "/" + x + "/" + y + "." + this.type);
+                                                                    return this.url + directory + "/" + z + "/" + x + "/" + y + "." + this.type;
+                                                            } else {
+                                                                    return "http://www.maptiler.org/img/none.png";
+                                                            }
                                                     }
                                                     
-                                                    }
+                                                }
                                                     
                                                     """ % args
                                             
@@ -2111,23 +2114,23 @@ class GDAL2Tiles(object):
                                                     """ % args
                                             
                                 s += """
-                                                function getWindowHeight() {
+                                        function getWindowHeight() {
                                                 if (self.innerHeight) return self.innerHeight;
                                                 if (document.documentElement && document.documentElement.clientHeight)
-                                                return document.documentElement.clientHeight;
+                                                        return document.documentElement.clientHeight;
                                                 if (document.body) return document.body.clientHeight;
                                                 return 0;
-                                                }
+                                        }
                                                 
-                                                function getWindowWidth() {
+                                        function getWindowWidth() {
                                                 if (self.innerWidth) return self.innerWidth;
                                                 if (document.documentElement && document.documentElement.clientWidth)
-                                                return document.documentElement.clientWidth;
+                                                        return document.documentElement.clientWidth;
                                                 if (document.body) return document.body.clientWidth;
                                                 return 0;
-                                                }
+                                        }
                                                 
-                                                function resize() {  
+                                        function resize() {  
                                                 var map = document.getElementById("map");  
                                                 var header = document.getElementById("header");  
                                                 var subheader = document.getElementById("subheader");  
@@ -2136,7 +2139,7 @@ class GDAL2Tiles(object):
                                                 header.style.width = (getWindowWidth()-20) + "px";
                                                 subheader.style.width = (getWindowWidth()-20) + "px";
                                                 if (map.updateSize) { map.updateSize(); };
-                                                } 
+                                        } 
                                                 
                                                 onresize=function(){ resize(); };
                                                 
