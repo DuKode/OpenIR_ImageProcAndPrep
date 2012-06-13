@@ -1000,10 +1000,10 @@ class GDAL2Tiles(object):
                         f.write( self.generate_googlemaps() )
                         f.close()"""
                     
-                    # Generate openlayers.html
+                    # Generate index.html
                     if self.options.webviewer in ('all','openlayers'):
-                        if not self.options.resume or not os.path.exists(os.path.join(self.output, 'openlayers.html')):
-                            f = open(os.path.join(self.output, 'openlayers.html'), 'w')
+                        if not self.options.resume or not os.path.exists(os.path.join(self.output, 'index.html')):
+                            f = open(os.path.join(self.output, 'index.html'), 'w')
                             f.write( self.generate_openlayers(combs) )
                             f.close()
                 
@@ -1015,10 +1015,10 @@ class GDAL2Tiles(object):
                     north, east = min(90.0, north), min(180.0, east)
                     self.swne = (south, west, north, east)
                     
-                    # Generate openlayers.html
+                    # Generate index.html
                     if self.options.webviewer in ('all','openlayers'):
-                        if not self.options.resume or not os.path.exists(os.path.join(self.output, 'openlayers.html')):
-                            f = open(os.path.join(self.output, 'openlayers.html'), 'w')
+                        if not self.options.resume or not os.path.exists(os.path.join(self.output, 'index.html')):
+                            f = open(os.path.join(self.output, 'index.html'), 'w')
                             f.write( self.generate_openlayers(combs) )
                             f.close()			
                 
@@ -1029,10 +1029,10 @@ class GDAL2Tiles(object):
                     
                     self.swne = (south, west, north, east)
                     
-                    # Generate openlayers.html
+                    # Generate index.html
                     if self.options.webviewer in ('all','openlayers'):
-                        if not self.options.resume or not os.path.exists(os.path.join(self.output, 'openlayers.html')):
-                            f = open(os.path.join(self.output, 'openlayers.html'), 'w')
+                        if not self.options.resume or not os.path.exists(os.path.join(self.output, 'index.html')):
+                            f = open(os.path.join(self.output, 'index.html'), 'w')
                             f.write( self.generate_openlayers(combs) )
                             f.close()			
                 
@@ -1838,7 +1838,7 @@ class GDAL2Tiles(object):
                             # -------------------------------------------------------------------------
         def generate_openlayers( self, combs ):
                                 """
-                                    Template for openlayers.html implementing overlay of available Spherical Mercator layers.
+                                    Template for index.html implementing overlay of available Spherical Mercator layers.
                                     
                                     It returns filled string. Expected variables:
                                     title, googlemapskey, yahooappid, north, south, east, west, minzoom, maxzoom, tilesize, tileformat, publishurl
@@ -1874,7 +1874,7 @@ class GDAL2Tiles(object):
                                     #The STND Directory name to save the tile must be names with the number of the comb ex: NewYork>>345,234,643,532
                                     
                                     
-                                    labels= {321:"True Color", 432: "Vegetation", 453: "Soil", 543: "Urban", 754: "Water"}
+                                    labels= {321:"True Color", 432: "Vegetation", 451:"choose451", 453: "Soil", 543: "Urban", 642:"choose642",751:"choose751",753:"choose753", 754: "Water"}
                                     
                                     s="" #initialize the var s
                                     
@@ -1926,11 +1926,7 @@ class GDAL2Tiles(object):
                                         #map { height: 95%%; border: 1px solid #888; }
                                         </style>""" % args
                                     
-                                if self.options.profile == 'mercator':
-                                        s += """
-                                            <script src='http://dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=6.1'></script>
-                                            <script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=%(googlemapskey)s' type='text/javascript'></script>
-                                            <script src="http://api.maps.yahoo.com/ajaxymap?v=3.0&amp;appid=%(yahooappid)s"></script>""" % args
+
                                     
                                 s += """
                                         
