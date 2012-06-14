@@ -1,0 +1,14 @@
+convert -set colorspace sRGB ${args[0]} ${args[1]} ${args[2]} -combine -depth 8 -type TrueColor -colorspace RGB ${args[3]}
+convert ${args[3]} -channel R  -contrast-stretch 0.15x0.05%  -channel G  -contrast-stretch 0.15x0.05%  -channel B  -contrast-stretch 0.15x0.05%   ${args[3]}
+echo '#'
+convert  -channel R ${args[0]} -auto-level  -channel G  ${args[1]} -auto-level  -channel B  ${args[2]} -auto-level  -combine -depth 8 -type TrueColor -colorspace RGB ${args[3]}
+
+#use for surface reflectance 
+
+convert ${args[0]} ${args[1]} ${args[2]} -combine -level 0.0%x8% ${args[3]}
+
+#use for GLS2005
+
+convert -monitor ${args[0]} ${args[1]} ${args[2]} -combine ${args[3]}
+
+convert ${args[3]} -channel R  -contrast-stretch 0.15x0.05%  -channel G  -contrast-stretch 0.15x0.05%  -channel B  -contrast-stretch 0.15x0.05%   ${args[3]}
