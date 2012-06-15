@@ -994,17 +994,11 @@ class GDAL2Tiles(object):
                     north, east = min(85.05112878, north), min(180.0, east)
                     self.swne = (south, west, north, east)
                     
-                    # Generate googlemaps.html
-                    """if self.options.webviewer in ('all','google') and self.options.profile == 'mercator':
-                        if not self.options.resume or not os.path.exists(os.path.join(self.output, 'googlemaps.html')):
-                        f = open(os.path.join(self.output, 'googlemaps.html'), 'w')
-                        f.write( self.generate_googlemaps() )
-                        f.close()"""
                     
                     # Generate index.html
                     if self.options.webviewer in ('all','openlayers'):
                         if not self.options.resume or not os.path.exists(os.path.join(self.output, 'index.html')):
-                            f = open(os.path.join(self.output, 'index.html'), 'w')
+                            f = open(os.path.join(os.path.split(self.output)[0], 'index.html'), 'w')
                             f.write( self.generate_openlayers(combs) )
                             f.close()
                 
@@ -1019,7 +1013,7 @@ class GDAL2Tiles(object):
                     # Generate index.html
                     if self.options.webviewer in ('all','openlayers'):
                         if not self.options.resume or not os.path.exists(os.path.join(self.output, 'index.html')):
-                            f = open(os.path.join(self.output, 'index.html'), 'w')
+                            f = open(os.path.join(os.path.split(self.output)[0], 'index.html'), 'w')
                             f.write( self.generate_openlayers(combs) )
                             f.close()			
                 
@@ -1033,14 +1027,14 @@ class GDAL2Tiles(object):
                     # Generate index.html
                     if self.options.webviewer in ('all','openlayers'):
                         if not self.options.resume or not os.path.exists(os.path.join(self.output, 'index.html')):
-                            f = open(os.path.join(self.output, 'index.html'), 'w')
+                            f = open(os.path.join(os.path.split(self.output)[0], 'index.html'), 'w')
                             f.write( self.generate_openlayers(combs) )
                             f.close()			
                 
                 
                 # Generate tilemapresource.xml.
                 if not self.options.resume or not os.path.exists(os.path.join(self.output, 'tilemapresource.xml')):
-                    f = open(os.path.join(self.output, 'tilemapresource.xml'), 'w')
+                    f = open(os.path.join(os.path.split(self.output)[0], 'tilemapresource.xml'), 'w')
                     f.write( self.generate_tilemapresource())
                     f.close()
                 
@@ -1055,7 +1049,7 @@ class GDAL2Tiles(object):
                     # Generate Root KML
                     if self.kml:
                         if not self.options.resume or not os.path.exists(os.path.join(self.output, 'doc.kml')):
-                            f = open(os.path.join(self.output, 'doc.kml'), 'w')
+                            f = open(os.path.join(os.path.split(self.output)[0], 'doc.kml'), 'w')
                             f.write( self.generate_kml( None, None, None, children) )
                             f.close()
             
