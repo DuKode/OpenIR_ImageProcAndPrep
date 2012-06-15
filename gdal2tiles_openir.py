@@ -2164,11 +2164,9 @@ if __name__=='__main__':
                 i=1
                 t0=time.time()
                 namesLoop= argv[-1]
-                #read combs from the external file "combs.txt" as a list of combs
-                file= open("combs.txt")
-                combs= file.readline()
-                combs=eval(combs)
                 namesLoop= namesLoop[1:-1].split(',')
+
+                ###Slicing loop###
                 for file_name in namesLoop:
                         print '#############'
                         print 'filename:', file_name
@@ -2178,6 +2176,16 @@ if __name__=='__main__':
                         gdal2tiles = GDAL2Tiles( argv[1:] )
                         gdal2tiles.process()
                         i+=1
+                        
+                ###prepare the list of combs from filenames###
+                combs=[]
+                for i in namesLoop:
+                        combs.append(i[-7:-4]) ##grabs the combination name from the filename
+                for i in range(len(combs)):
+                        combs[i]=int(combs[i])
+
+                
+                ###Generate the HTML index###
                 print ""
                 print "Generating index.html"
                 gdal2tiles.indexFile( combs )
