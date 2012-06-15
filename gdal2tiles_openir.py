@@ -38,6 +38,7 @@
 import sys
 import os
 import math
+import time
 
 try:
 	from osgeo import gdal
@@ -1885,7 +1886,7 @@ class GDAL2Tiles(object):
                                             
                                             var overlay_%d = new OpenLayers.Layer.TMS( "%d: %s", "",
                                             {   // url: '', serviceVersion: '.', layername: '.',
-                                            type: 'png', getURL: overlay_getTileURL("%d"), alpha: true, 
+                                            type: 'png', getURL: overlay_getTileURL("%d"), alpha: true, visibility: false,
                                             isBaseLayer: false
                                             });
                                             
@@ -2161,6 +2162,7 @@ if __name__=='__main__':
 
 	if argv:
                 i=1
+                t0=time.time()
                 namesLoop= argv[-1]
                 #read combs from the external file "combs.txt" as a list of combs
                 file= open("combs.txt")
@@ -2179,6 +2181,9 @@ if __name__=='__main__':
                 print ""
                 print "Generating index.html"
                 gdal2tiles.indexFile( combs )
+                t= (time.time()-t0)/60 #time elapsed in minutes
+                t=round(t,3)
+                print "Time elapsed ",t," minutes"
                 print "Done..."
                 print "OpenIR 2012" 
 
