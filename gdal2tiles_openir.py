@@ -2157,7 +2157,7 @@ if __name__=='__main__':
 	if argv:
                 i=1
                 t0=time.time()
-                namesLoop= argv[-1]
+                namesLoop= argv[-2]
                 namesLoop= namesLoop[1:-1].split(',')
 
                 ###Slicing loop###
@@ -2166,7 +2166,7 @@ if __name__=='__main__':
                         print 'filename:', file_name
                         print '#############'
                         print 'Slicing file (',i,'/',len(namesLoop),')'
-                        argv[-1]= file_name
+                        argv[-2]= file_name
                         gdal2tiles = GDAL2Tiles( argv[1:] )
                         gdal2tiles.process()
                         i+=1
