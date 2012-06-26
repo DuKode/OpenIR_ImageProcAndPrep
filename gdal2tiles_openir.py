@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 #******************************************************************************
 #  $Id: gdal2tiles.py 15748 2008-11-17 16:30:54Z klokan $
 # 
@@ -41,21 +41,21 @@ import math
 import time
 
 try:
-	from osgeo import gdal
-	from osgeo import osr
+        from osgeo import gdal
+        from osgeo import osr
 except ImportError:
-	import gdal
-	import osr
+        import gdal
+        import osr
 
 
 
 try:
-	from PIL import Image
-	import numpy
-	import osgeo.gdal_array as gdalarray
+        from PIL import Image
+        import numpy
+        import osgeo.gdal_array as gdalarray
 except:
-	# 'antialias' resampling is not available
-	pass
+        # 'antialias' resampling is not available
+        pass
 
 __version__ = "$Id: gdal2tiles_openir.py 15748 2008-11-17 16:30:54Z klokan--OpenIR team $"
 
@@ -104,7 +104,7 @@ import math
 MAXZOOMLEVEL = 32
 
 class GlobalMercator(object):
-	"""
+        """
         TMS Global Mercator Profile
         ---------------------------
         
@@ -123,10 +123,10 @@ class GlobalMercator(object):
         
         WGS84 coordinates   Spherical Mercator  Pixels in pyramid  Tiles in pyramid
         lat/lon            XY in metres     XY pixels Z zoom      XYZ from TMS 
-	    EPSG:4326           EPSG:900913                                         
+            EPSG:4326           EPSG:900913                                         
         .----.              ---------               --                TMS      
-	    /      \     <->     |       |     <->     /----/    <->      Google    
-	    \      /             |       |           /--------/          QuadTree   
+            /      \     <->     |       |     <->     /----/    <->      Google    
+            \      /             |       |           /--------/          QuadTree   
         -----               ---------         /------------/                   
         KML, public         WebMapService         Web Clients      TileMapService
         
@@ -179,8 +179,8 @@ class GlobalMercator(object):
         EPSG database.
         
         Proj4 Text:
-	    +proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0
-	    +k=1.0 +units=m +nadgrids=@null +no_defs
+            +proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0
+            +k=1.0 +units=m +nadgrids=@null +no_defs
         
         Human readable WKT format of EPGS:900913:
         PROJCS["Google Maps Global Mercator",
@@ -201,125 +201,125 @@ class GlobalMercator(object):
         AUTHORITY["EPSG","9001"]]]
         """
     
-	def __init__(self, tileSize=256):
-		"Initialize the TMS Global Mercator pyramid"
-		self.tileSize = tileSize
-		self.initialResolution = 2 * math.pi * 6378137 / self.tileSize
-		# 156543.03392804062 for tileSize 256 pixels
-		self.originShift = 2 * math.pi * 6378137 / 2.0
+        def __init__(self, tileSize=256):
+                "Initialize the TMS Global Mercator pyramid"
+                self.tileSize = tileSize
+                self.initialResolution = 2 * math.pi * 6378137 / self.tileSize
+                # 156543.03392804062 for tileSize 256 pixels
+                self.originShift = 2 * math.pi * 6378137 / 2.0
                 # 20037508.342789244
     
-	def LatLonToMeters(self, lat, lon ):
-		"Converts given lat/lon in WGS84 Datum to XY in Spherical Mercator EPSG:900913"
+        def LatLonToMeters(self, lat, lon ):
+                "Converts given lat/lon in WGS84 Datum to XY in Spherical Mercator EPSG:900913"
         
-		mx = lon * self.originShift / 180.0
-		my = math.log( math.tan((90 + lat) * math.pi / 360.0 )) / (math.pi / 180.0)
+                mx = lon * self.originShift / 180.0
+                my = math.log( math.tan((90 + lat) * math.pi / 360.0 )) / (math.pi / 180.0)
         
-		my = my * self.originShift / 180.0
-		return mx, my
+                my = my * self.originShift / 180.0
+                return mx, my
     
-	def MetersToLatLon(self, mx, my ):
-		"Converts XY point from Spherical Mercator EPSG:900913 to lat/lon in WGS84 Datum"
+        def MetersToLatLon(self, mx, my ):
+                "Converts XY point from Spherical Mercator EPSG:900913 to lat/lon in WGS84 Datum"
         
-		lon = (mx / self.originShift) * 180.0
-		lat = (my / self.originShift) * 180.0
+                lon = (mx / self.originShift) * 180.0
+                lat = (my / self.originShift) * 180.0
         
-		lat = 180 / math.pi * (2 * math.atan( math.exp( lat * math.pi / 180.0)) - math.pi / 2.0)
-		return lat, lon
+                lat = 180 / math.pi * (2 * math.atan( math.exp( lat * math.pi / 180.0)) - math.pi / 2.0)
+                return lat, lon
     
-	def PixelsToMeters(self, px, py, zoom):
-		"Converts pixel coordinates in given zoom level of pyramid to EPSG:900913"
+        def PixelsToMeters(self, px, py, zoom):
+                "Converts pixel coordinates in given zoom level of pyramid to EPSG:900913"
         
-		res = self.Resolution( zoom )
-		mx = px * res - self.originShift
-		my = py * res - self.originShift
-		return mx, my
+                res = self.Resolution( zoom )
+                mx = px * res - self.originShift
+                my = py * res - self.originShift
+                return mx, my
     
-	def MetersToPixels(self, mx, my, zoom):
-		"Converts EPSG:900913 to pyramid pixel coordinates in given zoom level"
+        def MetersToPixels(self, mx, my, zoom):
+                "Converts EPSG:900913 to pyramid pixel coordinates in given zoom level"
         
-		res = self.Resolution( zoom )
-		px = (mx + self.originShift) / res
-		py = (my + self.originShift) / res
-		return px, py
-	
-	def PixelsToTile(self, px, py):
-		"Returns a tile covering region in given pixel coordinates"
+                res = self.Resolution( zoom )
+                px = (mx + self.originShift) / res
+                py = (my + self.originShift) / res
+                return px, py
         
-		tx = int( math.ceil( px / float(self.tileSize) ) - 1 )
-		ty = int( math.ceil( py / float(self.tileSize) ) - 1 )
-		return tx, ty
-    
-	def PixelsToRaster(self, px, py, zoom):
-		"Move the origin of pixel coordinates to top-left corner"
-		
-		mapSize = self.tileSize << zoom
-		return px, mapSize - py
-    
-	def MetersToTile(self, mx, my, zoom):
-		"Returns tile for given mercator coordinates"
-		
-		px, py = self.MetersToPixels( mx, my, zoom)
-		return self.PixelsToTile( px, py)
-    
-	def TileBounds(self, tx, ty, zoom):
-		"Returns bounds of the given tile in EPSG:900913 coordinates"
-		
-		minx, miny = self.PixelsToMeters( tx*self.tileSize, ty*self.tileSize, zoom )
-		maxx, maxy = self.PixelsToMeters( (tx+1)*self.tileSize, (ty+1)*self.tileSize, zoom )
-		return ( minx, miny, maxx, maxy )
-    
-	def TileLatLonBounds(self, tx, ty, zoom ):
-		"Returns bounds of the given tile in latutude/longitude using WGS84 datum"
+        def PixelsToTile(self, px, py):
+                "Returns a tile covering region in given pixel coordinates"
         
-		bounds = self.TileBounds( tx, ty, zoom)
-		minLat, minLon = self.MetersToLatLon(bounds[0], bounds[1])
-		maxLat, maxLon = self.MetersToLatLon(bounds[2], bounds[3])
+                tx = int( math.ceil( px / float(self.tileSize) ) - 1 )
+                ty = int( math.ceil( py / float(self.tileSize) ) - 1 )
+                return tx, ty
+    
+        def PixelsToRaster(self, px, py, zoom):
+                "Move the origin of pixel coordinates to top-left corner"
+                
+                mapSize = self.tileSize << zoom
+                return px, mapSize - py
+    
+        def MetersToTile(self, mx, my, zoom):
+                "Returns tile for given mercator coordinates"
+                
+                px, py = self.MetersToPixels( mx, my, zoom)
+                return self.PixelsToTile( px, py)
+    
+        def TileBounds(self, tx, ty, zoom):
+                "Returns bounds of the given tile in EPSG:900913 coordinates"
+                
+                minx, miny = self.PixelsToMeters( tx*self.tileSize, ty*self.tileSize, zoom )
+                maxx, maxy = self.PixelsToMeters( (tx+1)*self.tileSize, (ty+1)*self.tileSize, zoom )
+                return ( minx, miny, maxx, maxy )
+    
+        def TileLatLonBounds(self, tx, ty, zoom ):
+                "Returns bounds of the given tile in latutude/longitude using WGS84 datum"
         
-		return ( minLat, minLon, maxLat, maxLon )
-    
-	def Resolution(self, zoom ):
-		"Resolution (meters/pixel) for given zoom level (measured at Equator)"
-		
-		# return (2 * math.pi * 6378137) / (self.tileSize * 2**zoom)
-		return self.initialResolution / (2**zoom)
-    
-	def ZoomForPixelSize(self, pixelSize ):
-		"Maximal scaledown zoom of the pyramid closest to the pixelSize."
-		
-		for i in range(MAXZOOMLEVEL):
-			if pixelSize > self.Resolution(i):
-				if i!=0:
-					return i-1
-				else:
-					return 0 # We don't want to scale up
-    
-	def GoogleTile(self, tx, ty, zoom):
-		"Converts TMS tile coordinates to Google Tile coordinates"
-		
-		# coordinate origin is moved from bottom-left to top-left corner of the extent
-		return tx, (2**zoom - 1) - ty
-    
-	def QuadTree(self, tx, ty, zoom ):
-		"Converts TMS tile coordinates to Microsoft QuadTree"
-		
-		quadKey = ""
-		ty = (2**zoom - 1) - ty
-		for i in range(zoom, 0, -1):
-			digit = 0
-			mask = 1 << (i-1)
-			if (tx & mask) != 0:
-				digit += 1
-			if (ty & mask) != 0:
-				digit += 2
-			quadKey += str(digit)
+                bounds = self.TileBounds( tx, ty, zoom)
+                minLat, minLon = self.MetersToLatLon(bounds[0], bounds[1])
+                maxLat, maxLon = self.MetersToLatLon(bounds[2], bounds[3])
         
-		return quadKey
+                return ( minLat, minLon, maxLat, maxLon )
+    
+        def Resolution(self, zoom ):
+                "Resolution (meters/pixel) for given zoom level (measured at Equator)"
+                
+                # return (2 * math.pi * 6378137) / (self.tileSize * 2**zoom)
+                return self.initialResolution / (2**zoom)
+    
+        def ZoomForPixelSize(self, pixelSize ):
+                "Maximal scaledown zoom of the pyramid closest to the pixelSize."
+                
+                for i in range(MAXZOOMLEVEL):
+                        if pixelSize > self.Resolution(i):
+                                if i!=0:
+                                        return i-1
+                                else:
+                                        return 0 # We don't want to scale up
+    
+        def GoogleTile(self, tx, ty, zoom):
+                "Converts TMS tile coordinates to Google Tile coordinates"
+                
+                # coordinate origin is moved from bottom-left to top-left corner of the extent
+                return tx, (2**zoom - 1) - ty
+    
+        def QuadTree(self, tx, ty, zoom ):
+                "Converts TMS tile coordinates to Microsoft QuadTree"
+                
+                quadKey = ""
+                ty = (2**zoom - 1) - ty
+                for i in range(zoom, 0, -1):
+                        digit = 0
+                        mask = 1 << (i-1)
+                        if (tx & mask) != 0:
+                                digit += 1
+                        if (ty & mask) != 0:
+                                digit += 2
+                        quadKey += str(digit)
+        
+                return quadKey
 
 #---------------------
 
 class GlobalGeodetic(object):
-	"""
+        """
         TMS Global Geodetic Profile
         ---------------------------
         
@@ -345,118 +345,118 @@ class GlobalGeodetic(object):
         
         WGS84 coordinates   Pixels in pyramid  Tiles in pyramid
         lat/lon         XY pixels Z zoom      XYZ from TMS 
-	    EPSG:4326                                           
+            EPSG:4326                                           
         .----.                ----                         
-	    /      \     <->    /--------/    <->      TMS      
-	    \      /         /--------------/                   
+            /      \     <->    /--------/    <->      TMS      
+            \      /         /--------------/                   
         -----        /--------------------/                
         WMS, KML    Web Clients, Google Earth  TileMapService
         """
     
-	def __init__(self, tileSize = 256):
-		self.tileSize = tileSize
+        def __init__(self, tileSize = 256):
+                self.tileSize = tileSize
     
-	def LatLonToPixels(self, lat, lon, zoom):
-		"Converts lat/lon to pixel coordinates in given zoom of the EPSG:4326 pyramid"
+        def LatLonToPixels(self, lat, lon, zoom):
+                "Converts lat/lon to pixel coordinates in given zoom of the EPSG:4326 pyramid"
         
-		res = 180.0 / self.tileSize / 2**zoom
-		px = (180 + lat) / res
-		py = (90 + lon) / res
-		return px, py
+                res = 180.0 / self.tileSize / 2**zoom
+                px = (180 + lat) / res
+                py = (90 + lon) / res
+                return px, py
     
-	def PixelsToTile(self, px, py):
-		"Returns coordinates of the tile covering region in pixel coordinates"
+        def PixelsToTile(self, px, py):
+                "Returns coordinates of the tile covering region in pixel coordinates"
         
-		tx = int( math.ceil( px / float(self.tileSize) ) - 1 )
-		ty = int( math.ceil( py / float(self.tileSize) ) - 1 )
-		return tx, ty
-	
-	def LatLonToTile(self, lat, lon, zoom):
-		"Returns the tile for zoom which covers given lat/lon coordinates"
-		
-		px, py = self.LatLonToPixels( lat, lon, zoom)
-		return self.PixelsToTile(px,py)
+                tx = int( math.ceil( px / float(self.tileSize) ) - 1 )
+                ty = int( math.ceil( py / float(self.tileSize) ) - 1 )
+                return tx, ty
+        
+        def LatLonToTile(self, lat, lon, zoom):
+                "Returns the tile for zoom which covers given lat/lon coordinates"
+                
+                px, py = self.LatLonToPixels( lat, lon, zoom)
+                return self.PixelsToTile(px,py)
     
-	def Resolution(self, zoom ):
-		"Resolution (arc/pixel) for given zoom level (measured at Equator)"
-		
-		return 180.0 / self.tileSize / 2**zoom
+        def Resolution(self, zoom ):
+                "Resolution (arc/pixel) for given zoom level (measured at Equator)"
+                
+                return 180.0 / self.tileSize / 2**zoom
     #return 180 / float( 1 << (8+zoom) )
     
-	def ZoomForPixelSize(self, pixelSize ):
-		"Maximal scaledown zoom of the pyramid closest to the pixelSize."
+        def ZoomForPixelSize(self, pixelSize ):
+                "Maximal scaledown zoom of the pyramid closest to the pixelSize."
         
-		for i in range(MAXZOOMLEVEL):
-			if pixelSize > self.Resolution(i):
-				if i!=0:
-					return i-1
-				else:
-					return 0 # We don't want to scale up
+                for i in range(MAXZOOMLEVEL):
+                        if pixelSize > self.Resolution(i):
+                                if i!=0:
+                                        return i-1
+                                else:
+                                        return 0 # We don't want to scale up
     
-	def TileBounds(self, tx, ty, zoom):
-		"Returns bounds of the given tile"
-		res = 180.0 / self.tileSize / 2**zoom
-		return (
+        def TileBounds(self, tx, ty, zoom):
+                "Returns bounds of the given tile"
+                res = 180.0 / self.tileSize / 2**zoom
+                return (
                         tx*self.tileSize*res - 180,
                         ty*self.tileSize*res - 90,
                         (tx+1)*self.tileSize*res - 180,
                         (ty+1)*self.tileSize*res - 90
                 )
     
-	def TileLatLonBounds(self, tx, ty, zoom):
-		"Returns bounds of the given tile in the SWNE form"
-		b = self.TileBounds(tx, ty, zoom)
-		return (b[1],b[0],b[3],b[2])
+        def TileLatLonBounds(self, tx, ty, zoom):
+                "Returns bounds of the given tile in the SWNE form"
+                b = self.TileBounds(tx, ty, zoom)
+                return (b[1],b[0],b[3],b[2])
 
 #---------------------
 # TODO: Finish Zoomify implemtentation!!!
 class Zoomify(object):
-	"""
+        """
         Tiles compatible with the Zoomify viewer
         ----------------------------------------
         """
     
-	def __init__(self, width, height, tilesize = 256, tileformat='jpg'):
-		"""Initialization of the Zoomify tile tree"""
-		
-		self.tilesize = tilesize
-		self.tileformat = tileformat
-		imagesize = (width, height)
-		tiles = ( math.ceil( width / tilesize ), math.ceil( height / tilesize ) )
+        def __init__(self, width, height, tilesize = 256, tileformat='jpg'):
+                """Initialization of the Zoomify tile tree"""
+                
+                self.tilesize = tilesize
+                self.tileformat = tileformat
+                imagesize = (width, height)
+                tiles = ( math.ceil( width / tilesize ), math.ceil( height / tilesize ) )
         
-		# Size (in tiles) for each tier of pyramid.
-		self.tierSizeInTiles = []
-		self.tierSizeInTiles.push( tiles )
+                # Size (in tiles) for each tier of pyramid.
+                self.tierSizeInTiles = []
+                self.tierSizeInTiles.push( tiles )
         
-		# Image size in pixels for each pyramid tierself
-		self.tierImageSize = []
-		self.tierImageSize.append( imagesize );
+                # Image size in pixels for each pyramid tierself
+                self.tierImageSize = []
+                self.tierImageSize.append( imagesize );
         
-		while (imagesize[0] > tilesize or imageSize[1] > tilesize ):
-			imagesize = (math.floor( imagesize[0] / 2 ), math.floor( imagesize[1] / 2) )
-			tiles = ( math.ceil( imagesize[0] / tilesize ), math.ceil( imagesize[1] / tilesize ) )
-			self.tierSizeInTiles.append( tiles )
-			self.tierImageSize.append( imagesize )
+                while (imagesize[0] > tilesize or imageSize[1] > tilesize ):
+                        imagesize = (math.floor( imagesize[0] / 2 ), math.floor( imagesize[1] / 2) )
+                        tiles = ( math.ceil( imagesize[0] / tilesize ), math.ceil( imagesize[1] / tilesize ) )
+                        self.tierSizeInTiles.append( tiles )
+                        self.tierImageSize.append( imagesize )
         
-		self.tierSizeInTiles.reverse()
-		self.tierImageSize.reverse()
+                self.tierSizeInTiles.reverse()
+                self.tierImageSize.reverse()
         
-		# Depth of the Zoomify pyramid, number of tiers (zoom levels)
-		self.numberOfTiers = len(self.tierSizeInTiles)
+                # Depth of the Zoomify pyramid, number of tiers (zoom levels)
+                self.numberOfTiers = len(self.tierSizeInTiles)
         
-		# Number of tiles up to the given tier of pyramid.
-		self.tileCountUpToTier = []
-		self.tileCountUpToTier[0] = 0
-		for i in range(1, self.numberOfTiers+1):
-			self.tileCountUpToTier.append(
+                # Number of tiles up to the given tier of pyramid.
+                self.tileCountUpToTier = []
+                self.tileCountUpToTier[0] = 0
+                for i in range(1, self.numberOfTiers+1):
+                        self.tileCountUpToTier.append(
                                           self.tierSizeInTiles[i-1][0] * self.tierSizeInTiles[i-1][1] + self.tileCountUpToTier[i-1]
-                                          )		
-	
-	def tilefilename(self, x, y, z):
-		"""Returns filename for tile with given coordinates"""
-		
-		tileIndex = x + y * self.tierSizeInTiles[z][0] + self.tileCountUpToTier[z]
-		return os.path.join("TileGroup%.0f" % math.floor( tileIndex / 256 ),
+                                          )             
+        
+        def tilefilename(self, x, y, z):
+                """Returns filename for tile with given coordinates"""
+                
+                tileIndex = x + y * self.tierSizeInTiles[z][0] + self.tileCountUpToTier[z]
+                return os.path.join("TileGroup%.0f" % math.floor( tileIndex / 256 ),
                             "%s-%s-%s.%s" % ( z, x, y, self.tileformat))
 
 # =============================================================================
@@ -465,26 +465,26 @@ class Zoomify(object):
 
 class GDAL2Tiles(object):
     
-	# -------------------------------------------------------------------------
+        # -------------------------------------------------------------------------
         def process(self):
-		"""The main processing function, runs all the main steps of processing Also takes a list of the band combination we have"""
-		
-		# Opening and preprocessing of the input file
-		self.open_input()
+                """The main processing function, runs all the main steps of processing Also takes a list of the band combination we have"""
+                
+                # Opening and preprocessing of the input file
+                self.open_input()
         
-		
-		# Generation of the lowest tiles
-		self.generate_base_tiles()
-		
-		# Generation of the overview tiles (higher in the pyramid)
-		self.generate_overview_tiles()
+                
+                # Generation of the lowest tiles
+                self.generate_base_tiles()
+                
+                # Generation of the overview tiles (higher in the pyramid)
+                self.generate_overview_tiles()
             
         # -------------------------------------------------------------------------
             
             
-        def indexFile(self, combs):
+        def indexFile(self, combs, string):
                 # Generation of main metadata files and HTML viewers (this was the second process but the order was chenge assuming there are no dependencies) 
-                    self.generate_metadata(combs)
+                self.generate_metadata(combs, string)
                     
         # -------------------------------------------------------------------------
         def error(self, msg, details = "" ):
@@ -492,7 +492,7 @@ class GDAL2Tiles(object):
                 
                 if details:
                     self.parser.error(msg + "\n\n" + details)
-                else:	
+                else:   
                     self.parser.error(msg)
     
         # -------------------------------------------------------------------------
@@ -657,7 +657,7 @@ class GDAL2Tiles(object):
                 # But this would have to be done on in memory VRT - created by CreateCopy()
                 # Let's do that together with merging of files later...
                 #p.add_option('-n', '--srcnodata', dest="srcnodata", metavar="NODATA",
-                #				  help="NODATA transparency value to assign to the input data")
+                #                                 help="NODATA transparency value to assign to the input data")
                 p.add_option("-v", "--verbose",
                              action="store_true", dest="verbose",
                              help="Print status messages to stdout")
@@ -689,7 +689,7 @@ class GDAL2Tiles(object):
                 # TODO: MapFile + TileIndexes per zoom level for efficient MapServer WMS
                 #g = OptionGroup(p, "WMS MapServer metadata", "Options for generated mapfile and tileindexes for MapServer")
                 #g.add_option("-i", "--tileindex", dest='wms', action="store_true"
-                #				  help="Generate tileindex and mapfile for MapServer (WMS)")
+                #                                 help="Generate tileindex and mapfile for MapServer (WMS)")
                 # p.add_option_group(g)
                 
                 p.set_defaults(verbose=False, profile="mercator", kml=False, url='',
@@ -764,7 +764,7 @@ class GDAL2Tiles(object):
                         self.in_srs = osr.SpatialReference()
                         self.in_srs.ImportFromWkt(self.in_srs_wkt)
                 #elif self.options.profile != 'raster':
-                #	self.error("There is no spatial reference system info included in the input file.","You should run gdal2tiles with --s_srs EPSG:XXXX or similar.")
+                #       self.error("There is no spatial reference system info included in the input file.","You should run gdal2tiles with --s_srs EPSG:XXXX or similar.")
                 
                 # Spatial Reference System of tiles
                 
@@ -980,8 +980,8 @@ class GDAL2Tiles(object):
                         self.tileswne = lambda x, y, z: (0,0,0,0)
                                 
             # -------------------------------------------------------------------------
-        def generate_metadata(self, combs):
-                """Generation of main metadata files and HTML viewers (metadata related to particular tiles are generated during the tile processing)."""
+        def generate_metadata(self, combs, string):
+                """Generation of main metadata files and HTML viewers (metadata related to particular tiles are generated during the tile processing). String variable takes 'leafler' pr 'openlayers'"""
                 
                 if not os.path.exists(self.output):
                     os.makedirs(self.output)
@@ -999,7 +999,10 @@ class GDAL2Tiles(object):
                     if self.options.webviewer in ('all','openlayers'):
                         if not self.options.resume or not os.path.exists(os.path.join(self.output, 'index.html')):
                             f = open(os.path.join(os.path.split(self.output)[0], 'index.html'), 'w')
-                            f.write( self.generate_openlayers(combs) )
+                            if string == 'leaflet':
+                                    f.write( self.generate_leaflet(combs) )
+                            else:
+                                    f.write( self.generate_openlayers(combs) )
                             f.close()
                 
                 elif self.options.profile == 'geodetic':
@@ -1015,7 +1018,7 @@ class GDAL2Tiles(object):
                         if not self.options.resume or not os.path.exists(os.path.join(self.output, 'index.html')):
                             f = open(os.path.join(os.path.split(self.output)[0], 'index.html'), 'w')
                             f.write( self.generate_openlayers(combs) )
-                            f.close()			
+                            f.close()                   
                 
                 elif self.options.profile == 'raster':
                     
@@ -1029,7 +1032,7 @@ class GDAL2Tiles(object):
                         if not self.options.resume or not os.path.exists(os.path.join(self.output, 'index.html')):
                             f = open(os.path.join(os.path.split(self.output)[0], 'index.html'), 'w')
                             f.write( self.generate_openlayers(combs) )
-                            f.close()			
+                            f.close()                   
                 
                 
                 # Generate tilemapresource.xml.
@@ -1185,7 +1188,7 @@ class GDAL2Tiles(object):
                             dsquery = self.mem_drv.Create('', querysize, querysize, tilebands)
                             # TODO: fill the null value in case a tile without alpha is produced (now only png tiles are supported)
                             #for i in range(1, tilebands+1):
-                            #	dsquery.GetRasterBand(1).Fill(tilenodata)
+                            #   dsquery.GetRasterBand(1).Fill(tilenodata)
                             dsquery.WriteRaster(wx, wy, wxsize, wysize, data, band_list=range(1,self.dataBandsCount+1))
                             dsquery.WriteRaster(wx, wy, wxsize, wysize, alpha, band_list=[tilebands])
                             
@@ -1255,7 +1258,7 @@ class GDAL2Tiles(object):
                             dsquery = self.mem_drv.Create('', 2*self.tilesize, 2*self.tilesize, tilebands)
                             # TODO: fill the null value
                             #for i in range(1, tilebands+1):
-                            #	dsquery.GetRasterBand(1).Fill(tilenodata)
+                            #   dsquery.GetRasterBand(1).Fill(tilenodata)
                             dstile = self.mem_drv.Create('', self.tilesize, self.tilesize, tilebands)
                             
                             # TODO: Implement more clever walking on the tiles with cache functionality
@@ -1358,7 +1361,7 @@ class GDAL2Tiles(object):
                                     for i in range(1,tilebands+1):
                                         # Black border around NODATA
                                         #if i != 4:
-                                        #	dsquery.GetRasterBand(i).SetNoDataValue(0)
+                                        #       dsquery.GetRasterBand(i).SetNoDataValue(0)
                                         res = gdal.RegenerateOverview( dsquery.GetRasterBand(i),
                                                                       dstile.GetRasterBand(i), 'average' )
                                         if res != 0:
@@ -1426,12 +1429,12 @@ class GDAL2Tiles(object):
                                     """ % args
                                 for z in range(self.tminz, self.tmaxz+1):
                                     if self.options.profile == 'raster':
-                                        s += """	    <TileSet href="%s%d" units-per-pixel="%.14f" order="%d"/>\n""" % (args['publishurl'], z, (2**(self.nativezoom-z) * self.out_gt[1]), z)
+                                        s += """            <TileSet href="%s%d" units-per-pixel="%.14f" order="%d"/>\n""" % (args['publishurl'], z, (2**(self.nativezoom-z) * self.out_gt[1]), z)
                                     elif self.options.profile == 'mercator':
-                                        s += """	    <TileSet href="%s%d" units-per-pixel="%.14f" order="%d"/>\n""" % (args['publishurl'], z, 156543.0339/2**z, z)
+                                        s += """            <TileSet href="%s%d" units-per-pixel="%.14f" order="%d"/>\n""" % (args['publishurl'], z, 156543.0339/2**z, z)
                                     elif self.options.profile == 'geodetic':
-                                        s += """	    <TileSet href="%s%d" units-per-pixel="%.14f" order="%d"/>\n""" % (args['publishurl'], z, 0.703125/2**z, z)
-                                s += """	  </TileSets>
+                                        s += """            <TileSet href="%s%d" units-per-pixel="%.14f" order="%d"/>\n""" % (args['publishurl'], z, 0.703125/2**z, z)
+                                s += """          </TileSets>
                                     </TileMap>
                                     """
                                 return s
@@ -1504,7 +1507,7 @@ class GDAL2Tiles(object):
                                         <west>%(west).14f</west>
                                         </LatLonBox>
                                         </GroundOverlay>
-                                        """ % args	
+                                        """ % args      
                                 
                                 for cx, cy, cz in children:
                                     csouth, cwest, cnorth, ceast = self.tileswne(cx, cy, cz)
@@ -1531,7 +1534,7 @@ class GDAL2Tiles(object):
                                         </NetworkLink>
                                         """ % (cz, cx, cy, args['tileformat'], args['minlodpixels'], cnorth, csouth, ceast, cwest, url, cz, cx, cy)
                                 
-                                s += """	  </Document>
+                                s += """          </Document>
                                     </kml>
                                     """
                                 return s
@@ -2021,7 +2024,7 @@ class GDAL2Tiles(object):
                                                     type: 'png', getURL: overlay_getTileURL 
                                                     });
                                                     map.addLayer(layer);
-                                                    map.zoomToExtent( mapBounds );	
+                                                    map.zoomToExtent( mapBounds );      
                                                     """ % args
                                             
                                             
@@ -2097,7 +2100,7 @@ class GDAL2Tiles(object):
                                                     var y = Math.round((bounds.bottom - this.maxExtent.bottom) / (res * this.tileSize.h));
                                                     var z = this.map.getZoom();
                                                     if (x >= 0 && y >= 0) {
-                                                    return this.url + z + "/" + x + "/" + y + "." + this.type;				
+                                                    return this.url + z + "/" + x + "/" + y + "." + this.type;                          
                                                     } else {
                                                     return "http://www.maptiler.org/img/none.png";
                                                     }
@@ -2148,13 +2151,217 @@ class GDAL2Tiles(object):
                                             
                                 return s
 
+
+
+        def generate_leaflet( self, combs ):
+                                """
+                                    Template for index.html implementing base layers of available band combinations.
+                                    
+                                    It returns filled string. Expected variables:
+                                    title, north, south, east, west, minzoom, maxzoom, tilesize, tileformat, publishurl
+                                    """
+                                
+                                args = {}
+                                args['title'] = self.options.title
+                                args['south'], args['west'], args['north'], args['east'] = self.swne
+                                args['minzoom'] = self.tminz
+                                args['maxzoom'] = self.tmaxz
+                                args['tilesize'] = self.tilesize
+                                args['tileformat'] = self.tileext
+                                args['publishurl'] = self.options.url
+                                args['copyright'] = self.options.copyright
+                                if self.options.profile == 'raster':
+                                    args['rasterzoomlevels'] = self.tmaxz+1
+                                    args['rastermaxresolution'] = 2**(self.nativezoom) * self.out_gt[1]
+                            
+                            
+                            
+                                def combs2html(combs):
+                                    
+                                    #Takes in an array of the combination ex. combs2html([754,321,432,543,453])
+                                    #outputs the html code that does 3 functions:
+                                    #1- generates the create layer code for all the bands
+                                    #2- generates the map.addLayers code
+                                    #The output is in a python string that contains the html code
+
+
+                                    #The STND Directory name to save the tile must be names with the number of the comb ex: NewYork>>345,234,643,532
+
+
+                                    labels= {321:"True Color", 432: "Vegetation", 451:"choose451", 453: "Soil", 543: "Urban", 642:"choose642",751:"choose751",753:"choose753", 754: "Water"}
+
+                                    s="" #initialize the var s
+
+                                    for i in range(len(combs)):
+
+                                        s+= """
+                                            // add %d  layer
+
+                                            var layer%dURL = '%d/{z}/{x}/{y}.png';
+                                            var layer%d = new L.TileLayer(layer%dURL, {maxZoom: 18, scheme:'tms'});
+                                            map.addLayer(layer%d);
+
+
+                                            """ %(combs[i],combs[i],combs[i],combs[i],combs[i],combs[i])
+
+                                    s+="""
+                                            //create an object that holds the base layers
+
+                                            var baselayers= {
+                                                "Open Street Maps": osm
+                                        """
+
+                                    for i in range(len(combs)):
+                                        s+="""
+                                                ,"%s": layer%d
+
+                                        """%(labels[combs[i]],combs[i])
+
+                                    s+="""
+                                            };
+    
+                                            var layersControl = new L.Control.Layers(baselayers);
+                                            map.addControl(layersControl);
+
+                                        """
+
+
+                                    return s
+                                    
+                                    
+                                    
+                                    #-------------- start the html file ------------------------#
+                                    
+                                s = """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+                                        <html xmlns="http://www.w3.org/1999/xhtml"
+                                        <head>
+                                        <title>%(title)s</title>
+                                        
+					<link rel="stylesheet" href="dist/leaflet.css" />
+					<!--[if lte IE 8]>
+					<link rel="stylesheet" href="dist/leaflet.ie.css" />
+					<![endif]-->                                        
+					<script type="text/javascript" src="dist/leaflet.js"></script>
+
+                                        """ % args
+                                    
+
+                                    
+                                s += """
+                                        
+                                        
+                                        <script type="text/javascript">
+                                        var map;
+                                        var mapMinZoom = %(minzoom)s;
+                                        var mapMaxZoom = %(maxzoom)s;
+                                        
+                                        
+                                        function initmap(){""" % args
+                                    
+                                if self.options.profile == 'mercator':
+                                        s += """
+                                            // set up the map
+                                            map = new L.Map('map');
+
+                                            
+                                            // create OSM tile layer with correct attribution
+                                            var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+                                            var osmAttrib='Map data Â© OpenStreetMap contributors';
+                                            var osm = new L.TileLayer(osmUrl, {minZoom: 8, maxZoom: 12, attribution: osmAttrib});
+
+                                            // start the map in specified location
+                                            map.setView(new L.LatLng(%(south)s, %(west)s),9);
+                                            map.addLayer(osm);
+
+
+                                            """ %args
+                                
+                                        #INSERT combs2html function here
+                                
+                                        s+= combs2html(combs)
+                                    
+                                        s+=  """
+                                            }
+                                        """
+                                            
+                                elif self.options.profile == 'geodetic':
+                                                s += """
+                                                    var options = {
+                                                    controls: [],
+                                                    projection: new OpenLayers.Projection("EPSG:4326"),
+                                                    maxResolution: 0.703125,
+                                                    maxExtent: new OpenLayers.Bounds(-180, -90, 180, 90)
+                                                    };
+                                                    map = new OpenLayers.Map('map', options);
+                                                    
+                                                    layer = new OpenLayers.Layer.WMS( "Blue Marble",
+                                                    "http://labs.metacarta.com/wms-c/Basic.py?", {layers: 'satellite' } );
+                                                    map.addLayer(layer);
+                                                    wms = new OpenLayers.Layer.WMS( "VMap0",
+                                                    "http://labs.metacarta.com/wms-c/Basic.py?", {layers: 'basic', format: 'image/png' } );
+                                                    map.addLayer(wms);
+                                                    
+                                                    var tmsoverlay = new OpenLayers.Layer.TMS( "TMS Overlay", "",
+                                                    {
+                                                    serviceVersion: '.', layername: '.', alpha: true,
+                                                    type: 'png', getURL: overlay_getTileURL,
+                                                    isBaseLayer: false
+                                                    });
+                                                    map.addLayer(tmsoverlay);
+                                                    if (OpenLayers.Util.alphaHack() == false) { tmsoverlay.setOpacity(0.7); }
+                                                    
+                                                    var switcherControl = new OpenLayers.Control.LayerSwitcher();
+                                                    map.addControl(switcherControl);
+                                                    switcherControl.maximizeControl();
+                                                    
+                                                    map.zoomToExtent( mapBounds );
+                                                    """
+                                            
+                                elif self.options.profile == 'raster':
+                                                s += """
+                                                    var options = {
+                                                    controls: [],
+                                                    maxExtent: new OpenLayers.Bounds(  %(west)s, %(south)s, %(east)s, %(north)s ),
+                                                    maxResolution: %(rastermaxresolution)f,
+                                                    numZoomLevels: %(rasterzoomlevels)d
+                                                    };
+                                                    map = new OpenLayers.Map('map', options);
+                                                    
+                                                    var layer = new OpenLayers.Layer.TMS( "TMS Layer","",
+                                                    {  url: '', serviceVersion: '.', layername: '.', alpha: true,
+                                                    type: 'png', getURL: overlay_getTileURL 
+                                                    });
+                                                    map.addLayer(layer);
+                                                    map.zoomToExtent( mapBounds );      
+                                                    """ % args
+                                            
+                                            
+
+                                            
+                                
+                                            
+                                s += """
+                                        </script>
+                                </head>
+ 
+ 
+                                <body onload="initmap()">
+
+                                        <div id="map" style="height: 1000px"></div>
+         
+                                </body>
+                                </html>"""
+                                
+                                            
+                                return s
+
 # =============================================================================
 # =============================================================================
 # =============================================================================
 if __name__=='__main__':
         argv = gdal.GeneralCmdLineProcessor( sys.argv ) #file name will be a list of all the file names  ex: [file1.geo.tif,file2.geo.tif] NO SPACES INSIDE THE LIST
 
-	if argv:
+        if argv:
                 i=1
                 t0=time.time()
                 namesLoop= argv[-2]
@@ -2183,7 +2390,7 @@ if __name__=='__main__':
                 ###Generate the HTML index###
                 print ""
                 print "Generating index.html"
-                gdal2tiles.indexFile( combs )
+                gdal2tiles.indexFile( combs, 'leaflet') #specifies leaflet as the map engine
                 t= (time.time()-t0)/60 #time elapsed in minutes
                 t=round(t,3)
                 print "Time elapsed ",t," minutes"
