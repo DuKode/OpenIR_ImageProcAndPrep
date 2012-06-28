@@ -1,0 +1,36 @@
+################################################################################	ASTER data acquisition with NASA ECHO Reverb
+#########	Arlene Ducao, June 28 2012
+######### 	arlduc@dukode.com		#######################################################################
+
+General ASTER resources
+ASTER products: https://lpdaac.usgs.gov/products/aster_products_table
+ASTER handbook: http://asterweb.jpl.nasa.gov/documents.asp
+ASTER bibliography: http://asterweb.jpl.nasa.gov/bibliography.asp
+HEG Tool to translate HDF-4: http://newsroom.gsfc.nasa.gov/sdptoolkit/HEG/HEGHome.html
+
+
+SEARCH PARAMETERS FOR THE ISLAND OF JAVA, JUNE 1-27 2012:
+http://reverb.echo.nasa.gov/reverb/granules?datasets=C179460405-LPDAAC_ECS%2CC179460406-LPDAAC_ECS%2CC14758250-LPDAAC_ECS%2CC190733714-LPDAAC_ECS&keywords=Aster&mso_=e7a67dc83314ab9074abf8c02edddc&new_view=true&spatial=-9.117%2C%2B114.756%2C%2B-5.543%2C%2B105.264&spatial_map=roadmap&spatial_type=rectangle&temporal_end=2012-06-26%2B23%3A59%3A59&temporal_start=2012-05-25%2B00%3A00%3A00&utf8=%E2%9C%93
+
+
+SEARCH PARAMETER FOR THE JAKARTA CAPITAL AREA, JUNE 1-27 2012:
+http://reverb.echo.nasa.gov/reverb/datasets#utf8=%E2%9C%93&new_view=true&spatial_map=roadmap&spatial_type=rectangle&spatial=-6.494%2C%20107.337%2C%20-5.912%2C%20106.319&keywords=Aster&temporal_start=2012-06-01%2000%3A00%3A00&temporal_end=2012-06-27%2023%3A59%3A59&selected=C179460405-LPDAAC_ECS%2CC179460406-LPDAAC_ECS%2CC14758250-LPDAAC_ECS%2CC190733714-LPDAAC_ECS
+
+
+
+For the island of Java (see search parameters above), "downloading" leads to these URLS:
+http://browse.echo.nasa.gov/LPDAAC_ECS/2012/06/25/:BR:Browse.001:2093175773:1.BINARY
+http://browse.echo.nasa.gov/LPDAAC_ECS/2012/06/25/:BR:Browse.001:2093175805:1.BINARY
+http://browse.echo.nasa.gov/LPDAAC_ECS/2012/06/25/:BR:Browse.001:2093175802:1.BINARY
+http://browse.echo.nasa.gov/LPDAAC_ECS/2012/06/25/:BR:Browse.001:2093175785:1.BINARY
+http://browse.echo.nasa.gov/LPDAAC_ECS/2012/06/25/:BR:Browse.001:2093175789:1.BINARY
+
+"Ordering" the files lead to these FTP links (may expire soon)
+Ftp Pull Download Links: ftp://e4ftl01.cr.usgs.gov/PullDir/0302687832IdOMgb
+Download ZIP file of packaged order: ftp://e4ftl01.cr.usgs.gov/PullDir/0302687832IdOMgb.zip
+
+
+
+
+
+

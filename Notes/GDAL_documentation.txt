@@ -1,0 +1,139 @@
+
+Band Combinations
+Download your georeferenced tiles.
+
+Compile your layers in photoshop or use this quick shell script to compile the layers. (The script is attached see description for more info on how to use it)
+
+ex.
+.sh compositeTile.sh Red-band3 Green-band2 Blue-band1 RGB-bands321.geotiff.tiff
+
+Once you have your georeferenced tiles from landsat you can start to create your TileMap
+
+Built your VRT.
+gdalbuildvrt -allow_projection_difference -input_file_list test_indexlist.txt test_index.vrt L71123064_06420070925.321.TIFGEO.TIF p122r064_7t20010715_z48.321.GEO.TIF
+
+Create your TileMap
+python2.7 /Library/Frameworks/GDAL.framework/Versions/1.9/Programs/gdal2tiles.py -z 2-8 test_index.vrt Tiles
+
+NOTE: the higher the zoom level the more processing and time it will require for the script to process the tilemap. Each tile will be 256 pixels that is how it is. So to estimate your max scale you can divide the landsat tile dimension to 256.
+ex. 8667PX /256 = 33.85546875.
+
+
+References:
+http://www.geotiff.osgeo.org/
+http:// www.imagemagick.org/
+http://www.gdal.org/gdal2tiles.html
+http://www.gdal.org/gdalbuildvrt.html
+http://wiki.osgeo.org/wiki/Tile_Map_Service_Specification
+
+http://trac.osgeo.org/gdal/wiki/UserDocs/RasterProcTutorial
+
+#########################################################
+#####SRTM AND LANDSAT 
+#########################################################
+
+#GEOREFERENCE LANDSAT TO FIT WORLDDATA AND TOPOGRAPHY. (I returned back to my 1.8 gdal, it works better on my machine)
+/Library/Frameworks/GDAL.framework/Versions/1.8/Programs/gdalwarp -t_srs '+proj=utm +zone=60 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs' /Users/iliaskoen/works/DuKode/OpenIR/Tuvalu/p077r064_7t20010108_z60.321.tifGEO.TIF /Users/iliaskoen/works/DuKode/OpenIR/Tuvalu/p077r064_7t20010108_z60.321.GEO.TIF
+
+/Library/Frameworks/GDAL.framework/Versions/1.8/Programs/gdalwarp -t_srs '+proj=utm +zone=60 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs'
+
+/Library/Frameworks/GDAL.framework/Versions/1.8/Programs/gdalwarp -dstalpha -srcnodata "0 0 0" --config CENTER_LONG 180 -t_srs  '+proj=longlat +zone=60 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs' 
+
+
+#################################################
+#########                  aster export with gdal
+#################################################
+
+#use gdalinfo to view the bands names 
+/Library/Frameworks/GDAL.framework/Versions/1.6/Programs/gdalinfo /Users/iliaskoen/works/DuKode/OpenIR/New_York/ASTER/AST_L1B_00304102005025556_20101117233922_29512.hdf 
+
+#start exporting with gdalwarp
+/Library/Frameworks/GDAL.framework/Versions/1.6/Programs/gdalwarp HDF4_EOS:EOS_SWATH:"/Users/iliaskoen/works/DuKode/OpenIR/New_York/ASTER/AST_L1B_00303082000212039_20110112133044_24101.hdf":TIR_Swath:ImageData12 1.tiff 
+
+/Library/Frameworks/GDAL.framework/Versions/1.6/Programs/gdalinfo /Users/iliaskoen/works/DuKode/OpenIR/New_York/ASTER/AST_L1B_00303082000212039_20110112133044_24101.hdf
+
+#########################################################
+#####stitch tiles together with alpha
+#########################################################
+
+
+/Library/Frameworks/GDAL.framework/Versions/1.8/Programs/gdalwarp -dstalpha -srcnodata "0 0 0" -dstnodata "0 0 0" -co "TILED=YES" 
+OR 
+gdalwarp -dstalpha -srcnodata "0 0 0" -dstnodata "0 0 0" -co "TILED=YES" /Users/iliaskoen/works/DuKode/OpenIR/Tuvalu/p077r064_7p20010108.ETM-EarthSat-Orthorectified/p077r064_7t20010108_z60.321.tifGEO_longlat.TIF /Users/iliaskoen/works/DuKode/OpenIR/Tuvalu/p075r066_7x20000413.ETM-EarthSat-Orthorectified/p075r066_7t20000413_z60.321.tifGEO_longlat.TIF /Users/iliaskoen/works/DuKode/OpenIR/Tuvalu/p076r065_7x20010117.ETM-EarthSat-Orthorectified/p076r065_7t20010117_z60.321.tifGEO_longlat.TIF /Users/iliaskoen/works/DuKode/OpenIR/Tuvalu/p076r065_7x20010117.ETM-EarthSat-Orthorectified/p076r065_7t20010117_z60.321.tifGEO.mosaic.TIF 
+
+Reference:
+http://trac.osgeo.org/gdal/wiki/UserDocs/RasterProcTutorial
+
+
+
+
+########################################################
+#### TUVALU - COMMAND REFERENCE  
+
+gdalwarp -dstalpha -srcnodata "0 0 0" /Users/iliaskoen/works/DuKode/OpenIR/Tuvalu/p077r064_7p20010108.ETM-EarthSat-Orthorectified/p077r064_7t20010108_z60.754.tifGEO.TIF /Users/iliaskoen/works/DuKode/OpenIR/Tuvalu/p076r065_7x20010117.ETM-EarthSat-Orthorectified/p076r065_7t20010117_z60.754.tifGEO.TIF /Users/iliaskoen/works/DuKode/OpenIR/Tuvalu/p075r066_7x20000413.ETM-EarthSat-Orthorectified/p075r066_7t20000413_z60.754.tifGEO.TIF p075r066_7t20000413_z60.754.mosaic.tif
+
+
+gdalbuildvrt -allow_projection_difference -input_file_list test_indexlist.txt test_index.321.vrt p076r065_7t20010117_z60.321.tifGEO.mosaic.TIF
+python2.7 /Library/Frameworks/GDAL.framework/Versions/1.9/Programs/gdal2tiles.py -z 2-15 test_index.321.vrt Tiles
+
+
+
+
+gdalbuildvrt -allow_projection_difference  -input_file_list test_indexlist.321.mfiles.txt test_index.321.mfiles.vrt /Users/iliaskoen/works/DuKode/OpenIR/Tuvalu/p077r064_7p20010108.ETM-EarthSat-Orthorectified/p077r064_7t20010108_z60.321.tifGEO.alpha.TIF  /Users/iliaskoen/works/DuKode/OpenIR/Tuvalu/p075r066_7x20000413.ETM-EarthSat-Orthorectified/p075r066_7t20000413_z60.321.tifGEO.alpha.TIF /Users/iliaskoen/works/DuKode/OpenIR/Tuvalu/p076r065_7x20010117.ETM-EarthSat-Orthorectified/p076r065_7t20010117_z60.321.tifGEO.alpha.TIF 
+#
+python2.7 /Library/Frameworks/GDAL.framework/Versions/1.9/Programs/gdal2tiles.py -z 2-15 test_index.321.mfiles.vrt  Tiles.321.mfiles
+
+gdalbuildvrt -allow_projection_difference  -input_file_list test_indexlist.432.mfiles.txt test_index.432.mfiles.vrt /Users/iliaskoen/works/DuKode/OpenIR/Tuvalu/p077r064_7p20010108.ETM-EarthSat-Orthorectified/p077r064_7t20010108_z60.432.tifGEO.alpha.TIF  /Users/iliaskoen/works/DuKode/OpenIR/Tuvalu/p075r066_7x20000413.ETM-EarthSat-Orthorectified/p075r066_7t20000413_z60.432.tifGEO.alpha.TIF /Users/iliaskoen/works/DuKode/OpenIR/Tuvalu/p076r065_7x20010117.ETM-EarthSat-Orthorectified/p076r065_7t20010117_z60.432.tifGEO.alpha.TIF 
+#
+python2.7 /Library/Frameworks/GDAL.framework/Versions/1.9/Programs/gdal2tiles.py -z 2-15 test_index.432.mfiles.vrt  Tiles.432.mfiles
+#########################
+gdalbuildvrt -allow_projection_difference  -input_file_list test_indexlist.453.mfiles.txt test_index.453.mfiles.vrt /Users/iliaskoen/works/DuKode/OpenIR/Tuvalu/p077r064_7p20010108.ETM-EarthSat-Orthorectified/p077r064_7t20010108_z60.453.tifGEO.alpha.TIF  /Users/iliaskoen/works/DuKode/OpenIR/Tuvalu/p075r066_7x20000413.ETM-EarthSat-Orthorectified/p075r066_7t20000413_z60.453.tifGEO.alpha.TIF /Users/iliaskoen/works/DuKode/OpenIR/Tuvalu/p076r065_7x20010117.ETM-EarthSat-Orthorectified/p076r065_7t20010117_z60.453.tifGEO.alpha.TIF 
+#
+python2.7 /Library/Frameworks/GDAL.framework/Versions/1.9/Programs/gdal2tiles.py -z 2-15 test_index.453.mfiles.vrt  Tiles.453.mfiles
+
+
+
+
+gdalbuildvrt -allow_projection_difference  -input_file_list test_indexlist.543.mfiles.txt test_index.543.mfiles.vrt /Users/iliaskoen/works/DuKode/OpenIR/Tuvalu/p077r064_7p20010108.ETM-EarthSat-Orthorectified/p077r064_7t20010108_z60.543.tifGEO.alpha.TIF  /Users/iliaskoen/works/DuKode/OpenIR/Tuvalu/p075r066_7x20000413.ETM-EarthSat-Orthorectified/p075r066_7t20000413_z60.543.tifGEO.alpha.TIF /Users/iliaskoen/works/DuKode/OpenIR/Tuvalu/p076r065_7x20010117.ETM-EarthSat-Orthorectified/p076r065_7t20010117_z60.543.tifGEO.alpha.TIF 
+python2.7 /Library/Frameworks/GDAL.framework/Versions/1.9/Programs/gdal2tiles.py -z 2 test_index.543.mfiles.vrt Tiles.543.mfiles
+#
+python2.7 /Library/Frameworks/GDAL.framework/Versions/1.9/Programs/gdal2tiles.py -z 2-15 test_index.543.mfiles.vrt  Tiles.543.mfiles
+##########################
+
+gdalbuildvrt -allow_projection_difference  -input_file_list test_indexlist.754.mfiles.txt test_index.754.mfiles.vrt /Users/iliaskoen/works/DuKode/OpenIR/Tuvalu/p077r064_7p20010108.ETM-EarthSat-Orthorectified/p077r064_7t20010108_z60.754.tifGEO.alpha.TIF  /Users/iliaskoen/works/DuKode/OpenIR/Tuvalu/p075r066_7x20000413.ETM-EarthSat-Orthorectified/p075r066_7t20000413_z60.754.tifGEO.alpha.TIF /Users/iliaskoen/works/DuKode/OpenIR/Tuvalu/p076r065_7x20010117.ETM-EarthSat-Orthorectified/p076r065_7t20010117_z60.754.tifGEO.alpha.TIF 
+#
+python2.7 /Library/Frameworks/GDAL.framework/Versions/1.9/Programs/gdal2tiles.py -z 2-15 test_index.754.mfiles.vrt  Tiles.754.mfiles
+
+
+python2.7 /Library/Frameworks/GDAL.framework/Versions/1.9/Programs/gdal2tiles.py -z 2-15 /Volumes/Drobo/DuKode/OpenIR/dev/Karachi/SRTM3/composite.relief_2f.tif /Volumes/Drobo/DuKode/OpenIR/dev/Karachi/SRTM3/composite.relief_2f
+
+sh /Users/iliaskoen/works/DuKode/OpenIR/scripts/compositetile.sh /Users/iliaskoen/works/DuKode/OpenIR/New_York/L71013032_03220051002.ETM-GLS2005/L71013032_03220051002_B70.TIF /Users/iliaskoen/works/DuKode/OpenIR/New_York/L71013032_03220051002.ETM-GLS2005/L71013032_03220051002_B40.TIF /Users/iliaskoen/works/DuKode/OpenIR/New_York/L71013032_03220051002.ETM-GLS2005/L71013032_03220051002_B20.TIF /Users/iliaskoen/works/DuKode/OpenIR/New_York/L71013032_03220051002.ETM-GLS2005/L71013032_03220051002.742.TIF 
+
+
+sh /Users/iliaskoen/works/DuKode/OpenIR/scripts/compositetile.sh /Users/iliaskoen/works/DuKode/OpenIR/London/L71202024_02420070326.ETM-GLS2005/L71202024_02420070326_B30.TIF /Users/iliaskoen/works/DuKode/OpenIR/London/L71202024_02420070326.ETM-GLS2005/L71202024_02420070326_B20.TIF /Users/iliaskoen/works/DuKode/OpenIR/London/L71202024_02420060510.ETM-GLS2005/L71202024_02420070326_B10.TIF /Users/iliaskoen/works/DuKode/OpenIR/London/L71202024_02420060510.ETM-GLS2005/L71202024_02420070326.321.TIF 
+
+gdalwarp -dstalpha -srcnodata "0 0 0" -dstnodata "0 0 0"
+
+
+python2.7 /Library/Frameworks/GDAL.framework/Versions/1.9/Programs/gdal2tiles.py -z 2-15 /Users/iliaskoen/works/DuKode/OpenIR/New_York/test_index.742.mfiles.tif /Users/iliaskoen/works/DuKode/OpenIR/New_York/test_index.742.mfiles
+
+
+
+#################################################
+#########                  aster export with gdal
+#################################################
+
+#use gdalinfo to view the bands names 
+/Library/Frameworks/GDAL.framework/Versions/1.6/Programs/gdalinfo /Users/iliaskoen/works/DuKode/OpenIR/New_York/ASTER/AST_L1B_00304102005025556_20101117233922_29512.hdf 
+
+#start exporting with gdalwarp
+/Library/Frameworks/GDAL.framework/Versions/1.6/Programs/gdalwarp HDF4_EOS:EOS_SWATH:"/Users/iliaskoen/works/DuKode/OpenIR/New_York/ASTER/AST_L1B_00303082000212039_20110112133044_24101.hdf":TIR_Swath:ImageData12 1.tiff 
+
+/Library/Frameworks/GDAL.framework/Versions/1.6/Programs/gdalinfo /Users/iliaskoen/works/DuKode/OpenIR/New_York/ASTER/AST_L1B_00303082000212039_20110112133044_24101.hdf 
+
+
+
+######################################################################
+
+
+/Library/Frameworks/GDAL.framework/Versions/1.8/Programs/gdalwarp -t_srs '+proj=apian +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs' 
